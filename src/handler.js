@@ -108,21 +108,93 @@ const addBookHandler = (request, h) => {
 };
 
 const constrainedKeys = ['id', 'name', 'publisher'];
-const filter = (obj, arr) => Object.fromEntries(Object.entries(obj).filter( ([k]) => arr.includes(k) ));
-filter(books, constrainedKeys);
+// const filter = (obj, arr) => Object.fromEntries(Object.entries(obj).filter( ([k]) => arr.includes(k) ));
+// filter(books, constrainedKeys);
 
-const getAllBooksHandler = () => ({
-    status: 'success',
-    data: {
-        books: books.map( obj =>{
-            let newObj = {};
-            constrainedKeys.forEach(key => {
-                newObj[key] = obj[key];
-            });
-            return newObj;
-        }),
-    },
-});
+const getAllBooksHandler = (request, h) => {
+    const {name, reading, finished} = request.query;
+    if (name)
+    {
+        console.log("query param: name is valid");
+        const response = h.response({
+            status: 'success',
+            data: {
+                books: books.reduce( (res, obj) => {
+                    if ( name && obj.name && obj.name.toLowerCase().includes(name.toLowerCase()) )
+                    {
+                        let newObj = {};
+                        constrainedKeys.forEach(key =>{
+                            newObj[key] = obj[key];
+                        });
+                        res.push(newObj);
+                    }
+                    return res;
+                }, [] ),
+            },
+        });
+        response.code(200);
+        return response;
+    }
+    if (reading)
+    {
+        console.log("query param: reading is valid");
+        const response = h.response({
+            status: 'success',
+            data: {
+                books: books.reduce( (res, obj) => {
+                    if (obj.reading == reading)
+                    {
+                        let newObj = {};
+                        constrainedKeys.forEach(key =>{
+                            newObj[key] = obj[key];
+                        });
+                        res.push(newObj);
+                    }
+                    return res;
+                }, [] ),
+            },
+        });
+        response.code(200);
+        return response;
+    }
+    if (finished)
+    {
+        console.log("query param: finished is valid");
+        const response = h.response({
+            status: 'success',
+            data: {
+                books: books.reduce( (res, obj) => {
+                    if (obj.finished == finished)
+                    {
+                        let newObj = {};
+                        constrainedKeys.forEach(key =>{
+                            newObj[key] = obj[key];
+                        });
+                        res.push(newObj);
+                    }
+                    return res;
+                }, [] ),
+            },
+        });
+        response.code(200);
+        return response;
+    }
+
+    const response = h.response({
+        status: 'success',
+        data: {
+            books: books.map( obj =>{
+                let newObj = {};
+                constrainedKeys.forEach(key => {
+                    newObj[key] = obj[key];
+                });
+                return newObj;
+            }),
+        },
+    });
+    response.code(200);
+    return response;
+};
 
 const getBookByIdHandler = (request, h) => {
     const {bookId} = request.params;
